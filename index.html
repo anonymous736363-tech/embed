@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBS Running Text Ticker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Mengatur background menjadi transparan agar tembus pandang di OBS */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: transparent; 
+            overflow: hidden; /* Mencegah scrollbar muncul di OBS */
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Kontainer utama diletakkan di bagian bawah layar (Lower Third) */
+        .ticker-container {
+            position: absolute;
+            bottom: 20px; /* Jarak dari bawah layar diperkecil */
+            left: 20px;   /* Jarak dari kiri layar diperkecil */
+            right: 20px;  /* Jarak dari kanan layar diperkecil */
+            height: 35px; /* Tinggi diubah menjadi lebih compact (35px) */
+            
+            /* Efek Glassmorphism */
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            
+            /* Styling border dan shadow bergaya gaming */
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.3), 
+                        inset 0 0 8px rgba(0, 255, 255, 0.1);
+            
+            display: flex;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        /* Kotak label "LIVE" atau "INFO" di sebelah kiri */
+        .ticker-label {
+            background: linear-gradient(135deg, #ff0055, #d90048);
+            color: white;
+            font-weight: 900;
+            font-size: 13px; /* Font size diperkecil */
+            letter-spacing: 1.5px;
+            padding: 0 15px; /* Padding disesuaikan */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+            box-shadow: 3px 0 10px rgba(0,0,0,0.4);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            text-transform: uppercase;
+        }
+
+        /* Titik merah berkedip untuk efek "Live" */
+        .pulse-dot {
+            width: 8px; /* Ukuran titik diperkecil */
+            height: 8px;
+            background-color: #fff;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(255, 255, 255, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+
+        /* Area tempat teks berjalan */
+        .ticker-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            mask-image: linear-gradient(to right, transparent, black 1%, black 99%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 1%, black 99%, transparent);
+        }
+
+        /* Teks yang berjalan */
+        .ticker-text {
+            color: #ffffff;
+            font-size: 14px; /* Ukuran font teks diperkecil */
+            font-weight: 400;
+            white-space: nowrap;
+            /* Padding left 100% memposisikan teks di luar layar bagian kanan sebelum mulai */
+            padding-left: 100%;
+            /* Durasi animasi diatur di sini (30s). Ubah untuk mempercepat/memperlambat */
+            animation: scroll-left 30s linear infinite;
+        }
+
+        /* Teks highlight / penekanan (Warna cyan/neon blue) */
+        .highlight {
+            color: #00e5ff;
+            font-weight: 700;
+            text-shadow: 0 0 6px rgba(0, 229, 255, 0.5);
+        }
+
+        /* Pembatas antar pesan */
+        .separator {
+            display: inline-block;
+            margin: 0 20px; /* Jarak antar pembatas disesuaikan */
+            color: #ff0055;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        /* Animasi pergerakan teks dari kanan ke kiri */
+        @keyframes scroll-left {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                /* Translasi -100% akan memindahkan teks sejauh lebar elemen itu sendiri */
+                transform: translateX(-100%);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ticker-container">
+        <!-- Bagian Kiri: Label LIVE -->
+        <div class="ticker-label">
+            <div class="pulse-dot"></div>
+            LIVE
+        </div>
+        
+        <!-- Bagian Kanan: Teks Berjalan -->
+        <div class="ticker-content">
+            <!-- EDIT TEKS ANDA DI BAWAH INI -->
+            <div class="ticker-text" id="runningText">
+                Selamat datang di Live Stream! Jangan lupa klik tombol <span class="highlight">Like</span> dan <span class="highlight">Subscribe</span>.
+                <span class="separator">◆</span>
+                Terima kasih banyak untuk donasi hari ini, dukungan kalian sangat berarti!
+                <span class="separator">◆</span>
+                Follow sosial media saya di IG/Twitter: <span class="highlight">@UsernameKamu</span>
+                <span class="separator">◆</span>
+                Jadwal Stream reguler: Setiap hari <span class="highlight">Senin - Jumat Pukul 19.00 WIB</span>.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // OPSI LANJUTAN: Jika Anda ingin mengubah teks menggunakan JavaScript (misalnya membaca dari file atau API)
+        // Anda bisa mengedit variabel di bawah ini. Jika tidak, cukup edit HTML di atas.
+        
+        /* 
+        const tickerElement = document.getElementById('runningText');
+        const customText = "Teks baru bisa dimasukkan dari sini juga! <span class='highlight'>Keren kan?</span>";
+        // tickerElement.innerHTML = customText;
+        */
+        
+        // Untuk menyesuaikan kecepatan teks berdasarkan panjang karakter secara otomatis,
+        // kita bisa menghitung lebar dan mengubah durasi animasi (Opsional, saat ini menggunakan CSS murni 30s).
+    </script>
+</body>
+</html>
